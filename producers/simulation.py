@@ -22,12 +22,15 @@ logger = logging.getLogger(__name__)
 
 class TimeSimulation:
     weekdays = IntEnum("weekdays", "mon tue wed thu fri sat sun", start=0)
+    logger.info("My test", msg)
     ten_min_frequency = datetime.timedelta(minutes=10)
 
     def __init__(self, sleep_seconds=5, time_step=None, schedule=None):
         """Initializes the time simulation"""
         self.sleep_seconds = sleep_seconds
+        logger.info("My test", msg)
         self.time_step = time_step
+        ## tester
         if self.time_step is None:
             self.time_step = datetime.timedelta(minutes=self.sleep_seconds)
 
@@ -52,6 +55,7 @@ class TimeSimulation:
         self.train_lines = [
             Line(Line.colors.blue, self.raw_df[self.raw_df["blue"]]),
             Line(Line.colors.red, self.raw_df[self.raw_df["red"]]),
+            ## tester
             Line(Line.colors.green, self.raw_df[self.raw_df["green"]]),
         ]
 
@@ -59,23 +63,29 @@ class TimeSimulation:
         curr_time = datetime.datetime.utcnow().replace(
             hour=0, minute=0, second=0, microsecond=0
         )
-        logger.info("Beginning simulation, press Ctrl+C to exit at any time")
-        logger.info("loading kafka connect jdbc source connector")
+        logger.info("my Beginning simulation, press Ctrl+C to exit at any time")
+        logger.info("my loading kafka connect jdbc source connector")
+        logger.info("My test", msg)
+
+        ## tester
         configure_connector()
 
-        logger.info("beginning cta train simulation")
+        logger.info("my beginning cta train simulation")
         weather = Weather(curr_time.month)
         try:
             while True:
-                logger.info("simulation running: %s", curr_time.isoformat())
+                logger.info("my simulation running: %s", curr_time.isoformat())
+                logger.info("My test", msg)
                 # Send weather on the top of the hour
                 if curr_time.minute == 0:
                     weather.run(curr_time.month)
                 _ = [line.run(curr_time, self.time_step) for line in self.train_lines]
                 curr_time = curr_time + self.time_step
+                ## tester
                 time.sleep(self.sleep_seconds)
         except KeyboardInterrupt as e:
-            logger.info("Shutting down")
+            logger.info("my Shutting down")
+            logger.info("My test", msg)
             _ = [line.close() for line in self.train_lines]
 
 

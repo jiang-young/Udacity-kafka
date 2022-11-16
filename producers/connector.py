@@ -14,11 +14,13 @@ CONNECTOR_NAME = "stations5"
 
 def configure_connector():
     """Starts and configures the Kafka Connect connector"""
-    logging.info("creating or updating kafka connect connector...")
+    logging.info("my creating or updating kafka connect connector...")
+    logger.info("My test", msg)
 
     resp = requests.get(f"{KAFKA_CONNECT_URL}/{CONNECTOR_NAME}")
     if resp.status_code == 200:
-        logging.info("connector already created skipping recreation")
+        logging.info("my connector already created skipping recreation")
+        logger.info("My test", msg)
         return
 
     resp = requests.post(
@@ -46,7 +48,8 @@ def configure_connector():
     )
 
     resp.raise_for_status()
-    logging.info("connector created successfully")
+    logging.info("my connector created successfully")
+    logger.info("My test", msg)
 
 
 if __name__ == "__main__":

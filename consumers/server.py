@@ -22,28 +22,33 @@ logger = logging.getLogger(__name__)
 
 class MainHandler(tornado.web.RequestHandler):
     """Defines a web request handler class"""
-
+    ## tester
     template_dir = tornado.template.Loader(f"{Path(__file__).parents[0]}/templates")
     template = template_dir.load("status.html")
+
+    ## tester
 
     def initialize(self, weather, lines):
         """Initializes the handler with required configuration"""
         self.weather = weather
         self.lines = lines
-
+        ## tester
     def get(self):
         """Responds to get requests"""
         logging.debug("rendering and writing handler template")
         self.write(MainHandler.template.generate(weather=self.weather, lines=self.lines))
+        ## tester
 
 
 def run_server():
     """Runs the Tornado Server and begins Kafka consumption"""
     if not topic_exists("TURNSTILE_SUMMARY"):
         logger.fatal("Ensure that the KSQL Command has run successfully before running the web server!")
+        ## tester
         exit(1)
     if not topic_exists("org.chicago.cta.stations.all.v5"):
         logger.fatal("Ensure that Faust Streaming is running successfully before running the web server!")
+        ## tester
         exit(1)
 
     weather_model = Weather()
@@ -51,6 +56,7 @@ def run_server():
 
     application = tornado.web.Application([(r"/", MainHandler, {"weather": weather_model, "lines": lines})])
     application.listen(8888)
+    ## tester
 
     # Build kafka consumers
     consumers = [
@@ -58,15 +64,19 @@ def run_server():
         KafkaConsumer("org.chicago.cta.stations.all.v5", lines.process_message, is_avro=False),
         KafkaConsumer("^org.chicago.cta.station.arrivals.*", lines.process_message, is_avro=True),
         KafkaConsumer("TURNSTILE_SUMMARY", lines.process_message, is_avro=False),
+        ## tester
     ]
 
     try:
         logger.info("Open a web browser to http://localhost:8888 to see the Transit Status Page")
+        logger.info("My test", msg)
         for consumer in consumers:
+            ## tester
             tornado.ioloop.IOLoop.current().spawn_callback(consumer.consume)
         tornado.ioloop.IOLoop.current().start()
     except KeyboardInterrupt as e:
         logger.info("shutting down server")
+        ## tester
         tornado.ioloop.IOLoop.current().stop()
         for consumer in consumers:
             consumer.close()

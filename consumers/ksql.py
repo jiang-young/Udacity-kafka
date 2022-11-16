@@ -21,14 +21,17 @@ KSQL_URL = "http://localhost:8088"
 #       Make sure to cast the COUNT of station id to `count`
 #       Make sure to set the value format to JSON
 
+
+#创建
 KSQL_STATEMENT = """
 CREATE TABLE turnstile (station_id INTEGER, num_entries INTEGER) 
 WITH (KAFKA_TOPIC='org.chicago.cta.turnstiles', VALUE_FORMAT='AVRO', KEY='station_id');
-
+""" + """
 CREATE TABLE turnstile_summary 
 WITH (VALUE_FORMAT='JSON') 
 AS SELECT station_id, SUM(num_entries) as count FROM turnstile GROUP BY station_id;
 """
+
 
 
 def execute_statement():
@@ -38,6 +41,7 @@ def execute_statement():
         return
 
     logging.debug("executing ksql statement...")
+    ## tester
 
     resp = requests.post(
         f"{KSQL_URL}/ksql",
@@ -52,6 +56,7 @@ def execute_statement():
 
     # Ensure that a 2XX status code was returned
     resp.raise_for_status()
+    ## tester
     logging.debug("ksql statement execution completed")
 
 

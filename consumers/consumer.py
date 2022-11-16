@@ -23,6 +23,7 @@ class KafkaConsumer:
         message_handler,
         is_avro,
         offset_earliest=True,
+        ## tester init
         sleep_secs=1.0,
         consume_timeout=0.1,
     ):
@@ -30,14 +31,17 @@ class KafkaConsumer:
         self.topic_name_pattern = topic_name_pattern
         self.message_handler = message_handler
         self.sleep_secs = sleep_secs
+        ## tester
         self.consume_timeout = consume_timeout
         self.offset_earliest = offset_earliest
+        logger.info("My test", msg)
 
         self.broker_properties = {
             "bootstrap.servers": BROKER_URL,
             # "compression.type": "lz4",
             'group.id': 'cta-group-05',
             'auto.offset.reset': 'earliest',
+            ## tester
             "batch.num.messages": 100,
             # "linger.ms": 1000,
         }
@@ -45,13 +49,17 @@ class KafkaConsumer:
         if is_avro is True:
             logger.info("AVRO consumer for topic: %s", self.topic_name_pattern)
             self.broker_properties["schema.registry.url"] = SCHEMA_REGISTRY_URL
+            ## tester
             self.consumer = AvroConsumer(self.broker_properties)
+            logger.info("My test", msg)
         else:
             logger.info("Standard consumer for topic: %s", self.topic_name_pattern)
             self.consumer = Consumer(self.broker_properties)
+            logger.info("My test", msg)
 
         self.consumer.subscribe(
             [self.topic_name_pattern,],
+            ## tester
             on_assign=self.on_assign
         )
 
@@ -60,6 +68,8 @@ class KafkaConsumer:
         if self.offset_earliest:
             for partition in partitions:
                 partition.offset = OFFSET_BEGINNING
+                logger.info("My test", msg)
+                ## tester
 
         logger.debug("partitions assigned for %s", self.topic_name_pattern)
         consumer.assign(partitions)
@@ -71,6 +81,8 @@ class KafkaConsumer:
                 num_results = 1
                 while num_results > 0:
                     num_results = self._consume()
+                    logger.info("My test", msg)
+                    ## tester
                 await gen.sleep(self.sleep_secs)
             except Exception as e:
                 logger.error("ERROR!!! %s", e)
@@ -79,14 +91,20 @@ class KafkaConsumer:
         """Polls for a message. Returns 1 if a message was received, 0 otherwise"""
         try:
             msg = self.consumer.poll(self.consume_timeout)
+            logger.info("My test", msg)
+            ## tester
         except SerializerError as e:
-            logger.error("Message deserialization failed for %s: %s", msg, e)
+            logger.error("TESTER Message deserialization failed for %s: %s", msg, e)
             return 0
 
         if msg is None:
+            ## tester
+            logger.info("My test", msg)
             return 0
         if msg.error():
-            logger.error("Consumer error: %s", msg.error())
+            ## tester
+            logger.info("My test", msg)
+            logger.error("TESTER Consumer error: %s", msg.error())
             return 0
 
         self.message_handler(msg)
